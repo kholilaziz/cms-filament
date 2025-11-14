@@ -1,0 +1,25 @@
+services:
+  cms-php:
+    image: php:8.3-fpm-alpine
+    container_name: cms-filament
+    restart: always
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - appnet
+
+  cms-nginx:
+    image: nginx:alpine
+    container_name: cms-nginx
+    restart: always
+    ports:
+      - "9002:80"
+    volumes:
+      - ./:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    external: true
