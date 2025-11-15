@@ -7,10 +7,12 @@ services:
     container_name: cms-filament-app
     restart: unless-stopped
     volumes:
+      # 1. Mount volume kode bersama
+      - app_code:/var/www/html
+      # 2. Timpa folder 'storage' dan file '.env' dengan bind mount
       - ./storage:/var/www/html/storage
       - ./.env:/var/www/html/.env
     networks:
-      # Hubungkan service ini ke jaringan 'appnet'
       - appnet
 
   # Service Web Server (Nginx)
@@ -18,21 +20,20 @@ services:
     image: nginx:1.25-alpine
     container_name: cms-filament-web
     restart: unless-stopped
-    # --- TIDAK ADA 'ports' ---
-    # Kita tidak mengekspos port ke host.
-    # Caddy akan mengaksesnya via jaringan 'appnet'.
     volumes:
-      - ./public:/var/www/html/public
+      # 1. Mount volume kode bersama (mode Read-Only/ro)
+      - app_code:/var/www/html:ro
+      # 2. Mount konfigurasi Nginx (TIDAK BERUBAH)
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
     networks:
-      # Hubungkan service ini juga ke 'appnet'
       - appnet
 
-# Mendefinisikan jaringan
 networks:
   appnet:
-    # Beri tahu Docker Compose bahwa 'appnet' adalah
-    # jaringan eksternal (sudah ada)
     external: true
+
+# 3. Definisikan named volume
+volumes:
+  app_code:
